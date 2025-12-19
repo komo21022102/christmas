@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式抽籤箱 - 手動決策版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #165b33 0%, #0a3d20 100%);
+            /* Christmas Green */
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .snowflake {
+            position: fixed;
+            top: -20px;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            animation: fall linear forwards;
+            z-index: 0;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(105vh) rotate(360deg);
+            }
+        }
+
+        .shaking {
+            animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0) rotate(-2deg);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0) rotate(4deg);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0) rotate(-4deg);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0) rotate(4deg);
+            }
+        }
+
+        .number-pop {
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8">
+    <div class="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-red-600 to-red-700 p-6 text-white text-center border-b-4 border-yellow-400">
+            <h1 class="text-2xl font-bold tracking-wider drop-shadow-md">🎄 出奇聖誕抽抽樂 🎁</h1>
+
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Settings Area -->
+            <div class="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                <div class="flex-1 space-y-2 w-full">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">設定總球數 (1 - N)</label>
+                    <input type="number" id="maxNumber" value="10" min="1" max="1000"
+                        class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all font-bold text-gray-700">
+                </div>
+                <button onclick="resetPool()"
+                    class="w-full md:w-auto px-6 py-2 bg-gray-800 hover:bg-black text-white rounded-xl font-bold transition-all active:scale-95 shadow-md">
+                    重置箱子
+                </button>
+            </div>
+
+            <!-- Drawing Interaction Area -->
+            <div class="relative py-4 flex flex-col items-center min-h-[300px] justify-center">
+                <!-- Status Badge -->
+                <div
+                    class="absolute top-0 right-0 bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold ring-1 ring-red-200">
+                    箱內尚有：<span id="remainingCount">10</span> 顆球
+                </div>
+
+                <!-- Box Icon / Animation Container -->
+                <div id="boxWrapper" class="relative">
+                    <div id="drawBox" class="cursor-pointer transition-transform hover:scale-105 active:scale-95">
+                        <img src="logo.png" alt="抽籤箱Logo" class="w-48 h-48 object-contain drop-shadow-lg">
+                    </div>
+
+                    <!-- Number Result Overlay -->
+                    <div id="resultOverlay"
+                        class="absolute inset-0 flex items-center justify-center pointer-events-none hidden">
+                        <div id="resultNumber"
+                            class="text-7xl font-black text-green-700 drop-shadow-xl number-pop bg-white/80 rounded-full w-32 h-32 flex items-center justify-center border-4 border-red-500">
+                            ?</div>
+                    </div>
+                </div>
+
+                <!-- Decision Panel (Shows after drawing) -->
+                <div id="decisionPanel"
+                    class="w-full mt-6 space-y-4 opacity-0 pointer-events-none transition-opacity duration-300">
+                    <p class="text-center text-gray-500 font-medium">您要如何處理號碼 <span id="currentNumDisplay"
+                            class="text-red-600 font-bold text-2xl"></span> ？</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="handleDecision(true)"
+                            class="bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-95">
+                            命中註定
+                        </button>
+                        <button onclick="handleDecision(false)"
+                            class="bg-green-500 hover:bg-green-600 text-white py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-95">
+                            重新配對
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Draw Button -->
+                <button id="drawBtn" onclick="startDraw()"
+                    class="w-64 py-4 bg-green-600 hover:bg-green-700 text-white text-xl font-bold rounded-2xl shadow-xl transition-all active:scale-95 mt-4 ring-4 ring-green-200">
+                    🎁 抽出聖誕驚喜
+                </button>
+            </div>
+
+            <!-- History -->
+            <div class="border-t border-gray-100 pt-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-700 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        最近抽籤紀錄
+                    </h3>
+                    <button onclick="clearHistory()"
+                        class="text-xs text-gray-400 hover:text-red-500 transition-colors">清除</button>
+                </div>
+                <div id="historyList" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar">
+                    <div class="text-gray-300 text-sm italic w-full text-center">尚無紀錄</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Toast -->
+    <div id="toast"
+        class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-medium shadow-2xl opacity-0 transition-opacity pointer-events-none z-50">
+        提示訊息
+    </div>
+
+    <script>
+        let pool = [];
+        let history = [];
+        let isAnimating = false;
+        let currentDrawnIndex = -1;
+        let currentDrawnNumber = -1;
+
+        // Init
+        window.onload = () => {
+            resetPool();
+            startSnow();
+        };
+
+        function startSnow() {
+            setInterval(createSnowflake, 300);
+        }
+
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            snowflake.textContent = ['❄', '❅', '❆'][Math.floor(Math.random() * 3)];
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+            snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            snowflake.style.opacity = Math.random() * 0.5 + 0.3;
+
+            document.body.appendChild(snowflake);
+
+            // Remove after animation
+            setTimeout(() => {
+                snowflake.remove();
+            }, 5000);
+        }
+
+        function resetPool() {
+            const max = parseInt(document.getElementById('maxNumber').value);
+            if (isNaN(max) || max < 1) {
+                showToast("請輸入有效的正整數！");
+                return;
+            }
+            pool = Array.from({ length: max }, (_, i) => i + 1);
+            history = [];
+            currentDrawnIndex = -1;
+            currentDrawnNumber = -1;
+
+            updateUI();
+            resetView();
+            showToast(`已重置箱子，共 ${max} 個號碼。`);
+        }
+
+        function updateUI() {
+            document.getElementById('remainingCount').textContent = pool.length;
+            renderHistory();
+        }
+
+        function resetView() {
+            document.getElementById('resultOverlay').classList.add('hidden');
+            document.getElementById('decisionPanel').classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('drawBtn').classList.remove('hidden');
+            document.getElementById('drawBox').classList.remove('shaking');
+        }
+
+        function startDraw() {
+            if (isAnimating) return;
+            if (pool.length === 0) {
+                showToast("箱子已經空了！");
+                return;
+            }
+
+            isAnimating = true;
+            const drawBtn = document.getElementById('drawBtn');
+            const drawBox = document.getElementById('drawBox');
+            const resultOverlay = document.getElementById('resultOverlay');
+            const resultNumber = document.getElementById('resultNumber');
+
+            // UI feedback
+            drawBtn.classList.add('hidden');
+            drawBox.classList.add('shaking');
+
+            // Rolling effect
+            let ticks = 0;
+            const maxTicks = 20;
+            const interval = setInterval(() => {
+                const tempNum = pool[Math.floor(Math.random() * pool.length)];
+                resultNumber.textContent = tempNum;
+                resultOverlay.classList.remove('hidden');
+                ticks++;
+
+                if (ticks >= maxTicks) {
+                    clearInterval(interval);
+                    finishDraw();
+                }
+            }, 60);
+        }
+
+        function finishDraw() {
+            currentDrawnIndex = Math.floor(Math.random() * pool.length);
+            currentDrawnNumber = pool[currentDrawnIndex];
+
+            // Display result
+            document.getElementById('resultNumber').textContent = currentDrawnNumber;
+            document.getElementById('currentNumDisplay').textContent = currentDrawnNumber;
+
+            // Stop shaking
+            document.getElementById('drawBox').classList.remove('shaking');
+
+            // Show decision panel
+            const panel = document.getElementById('decisionPanel');
+            panel.classList.remove('opacity-0', 'pointer-events-none');
+
+            isAnimating = false;
+        }
+
+        function handleDecision(shouldRemove) {
+            if (currentDrawnNumber === -1) return;
+
+            if (shouldRemove) {
+                pool.splice(currentDrawnIndex, 1);
+                showToast(`號碼 ${currentDrawnNumber} 命中註定！`);
+                addToHistory(currentDrawnNumber, "命中註定");
+            } else {
+                showToast(`號碼 ${currentDrawnNumber} 重新配對`);
+                addToHistory(currentDrawnNumber, "重新配對");
+            }
+
+            // Cleanup state for next draw
+            currentDrawnNumber = -1;
+            currentDrawnIndex = -1;
+
+            updateUI();
+            resetView();
+        }
+
+        function addToHistory(num, action) {
+            const colorClass = action === "命中註定" ? "text-red-500" : "text-green-500";
+            history.unshift({ num, action, colorClass, time: new Date().toLocaleTimeString() });
+            if (history.length > 30) history.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            if (history.length === 0) {
+                list.innerHTML = '<div class="text-gray-300 text-sm italic w-full text-center">尚無紀錄</div>';
+                return;
+            }
+
+            list.innerHTML = history.map(h => `
+                <div class="bg-gray-50 border border-gray-100 px-3 py-1 rounded-lg text-xs flex flex-col items-center">
+                    <span class="font-bold text-gray-700 text-sm">${h.num}</span>
+                    <span class="${h.colorClass} font-medium">${h.action}</span>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            history = [];
+            renderHistory();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        // Clicking box triggers draw if not waiting for decision
+        document.getElementById('drawBox').addEventListener('click', () => {
+            const panel = document.getElementById('decisionPanel');
+            if (!isAnimating && panel.classList.contains('opacity-0')) {
+                startDraw();
+            }
+        });
+    </script>
+</body>
+
+</html>
