@@ -4,28 +4,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>互動式抽籤箱 - 手動決策版</title>
+    <title>🎄 聖誕抽抽樂 🎁</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
 
         body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background: linear-gradient(135deg, #165b33 0%, #0a3d20 100%);
-            /* Christmas Green */
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #d63031 0%, #e17055 50%, #d63031 100%);
             min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
         }
 
+        /* 手繪風格背景裝飾 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 184, 108, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 234, 167, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 可愛雪花 */
         .snowflake {
             position: fixed;
             top: -20px;
             color: #fff;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(255, 255, 255, 0.6);
             animation: fall linear forwards;
-            z-index: 0;
+            z-index: 1;
             user-select: none;
             pointer-events: none;
+            font-size: 20px;
         }
 
         @keyframes fall {
@@ -34,145 +53,448 @@
             }
         }
 
+        /* 手繪風格容器 */
+        .hand-drawn-container {
+            background: #fffef9;
+            border-radius: 30px;
+            box-shadow:
+                0 8px 30px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            position: relative;
+            border: 3px solid #8b4513;
+            overflow: hidden;
+        }
+
+        /* 手繪風格標題 */
+        .hand-drawn-title {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-bottom: 5px solid #ffd93d;
+            position: relative;
+            border-radius: 27px 27px 0 0;
+        }
+
+        .hand-drawn-title::before {
+            content: '❄';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .hand-drawn-title::after {
+            content: '❄';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 30px;
+            animation: float 3s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(-50%) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-60%) rotate(10deg);
+            }
+        }
+
+        /* 手繪按鈕風格 */
+        .hand-drawn-btn {
+            border: 3px solid #8b4513;
+            border-radius: 20px;
+            box-shadow:
+                0 4px 0 #6d3610,
+                0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+            transform: rotate(-1deg);
+        }
+
+        .hand-drawn-btn:hover {
+            transform: rotate(0deg) translateY(-2px);
+            box-shadow:
+                0 6px 0 #6d3610,
+                0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .hand-drawn-btn:active {
+            transform: rotate(0deg) translateY(2px);
+            box-shadow:
+                0 2px 0 #6d3610,
+                0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 抽獎箱搖晃動畫 */
         .shaking {
-            animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+            animation: shake 0.6s cubic-bezier(.36, .07, .19, .97) both;
         }
 
         @keyframes shake {
 
             10%,
             90% {
-                transform: translate3d(-1px, 0, 0) rotate(-2deg);
+                transform: translate3d(-2px, 0, 0) rotate(-3deg);
             }
 
             20%,
             80% {
-                transform: translate3d(2px, 0, 0) rotate(4deg);
+                transform: translate3d(3px, 0, 0) rotate(5deg);
             }
 
             30%,
             50%,
             70% {
-                transform: translate3d(-4px, 0, 0) rotate(-4deg);
+                transform: translate3d(-5px, 0, 0) rotate(-5deg);
             }
 
             40%,
             60% {
-                transform: translate3d(4px, 0, 0) rotate(4deg);
+                transform: translate3d(5px, 0, 0) rotate(5deg);
             }
         }
 
+        /* 數字彈出動畫 */
         .number-pop {
-            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         @keyframes pop {
             0% {
-                transform: scale(0.5);
+                transform: scale(0.3) rotate(-10deg);
                 opacity: 0;
             }
 
+            50% {
+                transform: scale(1.1) rotate(5deg);
+            }
+
             100% {
-                transform: scale(1);
+                transform: scale(1) rotate(0deg);
                 opacity: 1;
             }
         }
 
+        /* 手繪風格輸入框 */
+        .hand-drawn-input {
+            border: 3px solid #8b4513;
+            border-radius: 15px;
+            background: #fff;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .hand-drawn-input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow:
+                inset 0 2px 5px rgba(0, 0, 0, 0.1),
+                0 0 0 3px rgba(255, 107, 107, 0.2);
+        }
+
+        /* 手繪風格徽章 */
+        .hand-drawn-badge {
+            background: #fffef9;
+            border: 3px solid #ff6b6b;
+            border-radius: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transform: rotate(2deg);
+        }
+
+        /* 歷史紀錄卡片 */
+        .history-card {
+            background: linear-gradient(135deg, #fff5eb 0%, #ffe9d6 100%);
+            border: 2px solid #ffd93d;
+            border-radius: 12px;
+            transform: rotate(-1deg);
+            transition: transform 0.2s;
+        }
+
+        .history-card:hover {
+            transform: rotate(0deg) scale(1.05);
+        }
+
+        /* 裝飾性元素 */
+        .deco-tree {
+            position: fixed;
+            font-size: 60px;
+            opacity: 0.3;
+            animation: sway 4s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .deco-snowman {
+            position: fixed;
+            font-size: 50px;
+            opacity: 0.25;
+            animation: bounce-slow 3s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .deco-gift {
+            position: fixed;
+            font-size: 45px;
+            opacity: 0.3;
+            animation: wiggle 2.5s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .deco-star {
+            position: fixed;
+            font-size: 35px;
+            opacity: 0.4;
+            animation: twinkle 2s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .deco-bell {
+            position: fixed;
+            font-size: 40px;
+            opacity: 0.3;
+            animation: swing 2s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .deco-reindeer {
+            position: fixed;
+            font-size: 55px;
+            opacity: 0.25;
+            animation: float-lr 5s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes sway {
+
+            0%,
+            100% {
+                transform: rotate(-5deg);
+            }
+
+            50% {
+                transform: rotate(5deg);
+            }
+        }
+
+        @keyframes bounce-slow {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes wiggle {
+
+            0%,
+            100% {
+                transform: rotate(-3deg);
+            }
+
+            50% {
+                transform: rotate(3deg);
+            }
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.2;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes swing {
+
+            0%,
+            100% {
+                transform: rotate(-8deg);
+            }
+
+            50% {
+                transform: rotate(8deg);
+            }
+        }
+
+        @keyframes float-lr {
+
+            0%,
+            100% {
+                transform: translateX(0) translateY(0);
+            }
+
+            50% {
+                transform: translateX(10px) translateY(-8px);
+            }
+        }
+
         .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
+            width: 8px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e0;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
             border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #fff5eb;
+            border-radius: 10px;
+        }
+
+        /* 禮物盒動畫 */
+        .gift-bounce {
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
     </style>
 </head>
 
 <body class="p-4 md:p-8">
-    <div class="max-w-xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-red-600 to-red-700 p-6 text-white text-center border-b-4 border-yellow-400">
-            <h1 class="text-2xl font-bold tracking-wider drop-shadow-md">🎄 出奇聖誕抽抽樂 🎁</h1>
+    <!-- 聖誕裝飾元素 -->
+    <!-- 聖誕樹 -->
+    <div class="deco-tree" style="bottom: 20px; left: 20px;">🎄</div>
+    <div class="deco-tree" style="top: 100px; right: 30px;">🎄</div>
+    <div class="deco-tree" style="bottom: 150px; right: 80px;">🎄</div>
 
+    <!-- 雪人 -->
+    <div class="deco-snowman" style="top: 50px; left: 80px;">⛄</div>
+    <div class="deco-snowman" style="bottom: 200px; left: 150px;">⛄</div>
+
+    <!-- 禮物盒 -->
+    <div class="deco-gift" style="top: 200px; left: 50px;">🎁</div>
+    <div class="deco-gift" style="bottom: 80px; right: 150px;">🎁</div>
+    <div class="deco-gift" style="top: 300px; right: 100px;">🎁</div>
+
+    <!-- 星星 -->
+    <div class="deco-star" style="top: 80px; left: 200px;">⭐</div>
+    <div class="deco-star" style="top: 250px; right: 50px;">⭐</div>
+    <div class="deco-star" style="bottom: 120px; left: 100px;">⭐</div>
+    <div class="deco-star" style="top: 150px; right: 200px;">✨</div>
+
+    <!-- 聖誕鈴鐺 -->
+    <div class="deco-bell" style="top: 180px; left: 30px;">🔔</div>
+    <div class="deco-bell" style="bottom: 50px; right: 50px;">🔔</div>
+
+    <!-- 馴鹿 -->
+    <div class="deco-reindeer" style="top: 120px; right: 120px;">🦌</div>
+
+    <div class="max-w-xl mx-auto hand-drawn-container relative z-10">
+        <!-- Header -->
+        <div class="hand-drawn-title p-8 text-white text-center">
+            <h1 class="text-3xl md:text-4xl font-black tracking-wide drop-shadow-lg"
+                style="text-shadow: 3px 3px 0 rgba(0,0,0,0.2);">
+                � 12月聖誕抽抽樂 🎁
+            </h1>
+            <p class="text-sm mt-2 opacity-90 font-medium">聖誕奇蹟！好運滿滿！</p>
         </div>
 
-        <div class="p-6 space-y-6">
+        <div class="p-6 md:p-8 space-y-6">
             <!-- Settings Area -->
-            <div class="flex flex-col md:flex-row gap-4 items-end bg-gray-50 p-4 rounded-2xl border border-gray-100">
+            <div
+                class="flex flex-col md:flex-row gap-4 items-end bg-gradient-to-br from-orange-50 to-yellow-50 p-5 rounded-3xl border-3 border-dashed border-orange-300">
                 <div class="flex-1 space-y-2 w-full">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">設定總球數 (1 - N)</label>
+                    <label class="block text-sm font-bold text-orange-800 tracking-wide">🎯 設定總球數 (1 - N)</label>
                     <input type="number" id="maxNumber" value="10" min="1" max="1000"
-                        class="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all font-bold text-gray-700">
+                        class="hand-drawn-input w-full px-4 py-3 font-bold text-gray-700 text-lg">
                 </div>
                 <button onclick="resetPool()"
-                    class="w-full md:w-auto px-6 py-2 bg-gray-800 hover:bg-black text-white rounded-xl font-bold transition-all active:scale-95 shadow-md">
-                    重置箱子
+                    class="hand-drawn-btn w-full md:w-auto px-6 py-3 bg-gradient-to-br from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-bold text-lg">
+                    🔄 重置箱子
                 </button>
             </div>
 
             <!-- Drawing Interaction Area -->
-            <div class="relative py-4 flex flex-col items-center min-h-[300px] justify-center">
+            <div class="relative py-8 flex flex-col items-center min-h-[350px] justify-center">
                 <!-- Status Badge -->
-                <div
-                    class="absolute top-0 right-0 bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold ring-1 ring-red-200">
-                    箱內尚有：<span id="remainingCount">10</span> 顆球
+                <div class="hand-drawn-badge absolute top-2 right-2 px-4 py-2 text-sm font-bold text-red-600">
+                    🎪 箱內尚有：<span id="remainingCount" class="text-2xl">10</span> 顆球
                 </div>
 
                 <!-- Box Icon / Animation Container -->
-                <div id="boxWrapper" class="relative">
-                    <div id="drawBox" class="cursor-pointer transition-transform hover:scale-105 active:scale-95">
-                        <img src="logo.png" alt="抽籤箱Logo" class="w-48 h-48 object-contain drop-shadow-lg">
+                <div id="boxWrapper" class="relative gift-bounce">
+                    <div id="drawBox" class="cursor-pointer transition-transform hover:scale-110 active:scale-95">
+                        <img src="logo.png" alt="抽籤箱Logo" class="w-56 h-56 object-contain drop-shadow-2xl"
+                            style="filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));">
                     </div>
 
                     <!-- Number Result Overlay -->
                     <div id="resultOverlay"
                         class="absolute inset-0 flex items-center justify-center pointer-events-none hidden">
                         <div id="resultNumber"
-                            class="text-7xl font-black text-green-700 drop-shadow-xl number-pop bg-white/80 rounded-full w-32 h-32 flex items-center justify-center border-4 border-red-500">
+                            class="text-8xl font-black text-red-600 drop-shadow-2xl number-pop bg-yellow-100 rounded-full w-40 h-40 flex items-center justify-center border-4 border-red-500"
+                            style="box-shadow: 0 0 30px rgba(255,107,107,0.6), inset 0 4px 10px rgba(255,255,255,0.5);">
                             ?</div>
                     </div>
                 </div>
 
                 <!-- Decision Panel (Shows after drawing) -->
                 <div id="decisionPanel"
-                    class="w-full mt-6 space-y-4 opacity-0 pointer-events-none transition-opacity duration-300">
-                    <p class="text-center text-gray-500 font-medium">您要如何處理號碼 <span id="currentNumDisplay"
-                            class="text-red-600 font-bold text-2xl"></span> ？</p>
+                    class="w-full mt-8 space-y-4 opacity-0 pointer-events-none transition-opacity duration-300">
+                    <p class="text-center text-gray-700 font-bold text-lg">
+                        您要如何處理號碼
+                        <span id="currentNumDisplay"
+                            class="text-red-600 font-black text-4xl inline-block px-3 py-1 bg-yellow-100 rounded-2xl border-3 border-red-400"></span>
+                        ？
+                    </p>
                     <div class="grid grid-cols-2 gap-4">
                         <button onclick="handleDecision(true)"
-                            class="bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-95">
-                            命中註定
+                            class="hand-drawn-btn bg-gradient-to-br from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white py-4 font-black text-lg">
+                            ❤️ 命中註定
                         </button>
                         <button onclick="handleDecision(false)"
-                            class="bg-green-500 hover:bg-green-600 text-white py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-95">
-                            重新配對
+                            class="hand-drawn-btn bg-gradient-to-br from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white py-4 font-black text-lg">
+                            🔄 重新配對
                         </button>
                     </div>
                 </div>
 
                 <!-- Main Draw Button -->
                 <button id="drawBtn" onclick="startDraw()"
-                    class="w-64 py-4 bg-green-600 hover:bg-green-700 text-white text-xl font-bold rounded-2xl shadow-xl transition-all active:scale-95 mt-4 ring-4 ring-green-200">
-                    🎁 抽出聖誕驚喜
+                    class="hand-drawn-btn w-72 py-5 bg-gradient-to-br from-yellow-400 via-yellow-500 to-orange-500 hover:from-yellow-500 hover:via-yellow-600 hover:to-orange-600 text-white text-2xl font-black mt-6"
+                    style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                    🎁 抽出聖誕驚喜！
                 </button>
             </div>
 
             <!-- History -->
-            <div class="border-t border-gray-100 pt-6">
+            <div class="border-t-4 border-dashed border-orange-300 pt-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-gray-700 flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+                    <h3 class="font-black text-xl text-orange-800 flex items-center">
+                        <span class="text-2xl mr-2">📜</span>
                         最近抽籤紀錄
                     </h3>
                     <button onclick="clearHistory()"
-                        class="text-xs text-gray-400 hover:text-red-500 transition-colors">清除</button>
+                        class="text-sm text-orange-400 hover:text-red-500 transition-colors font-bold px-3 py-1 rounded-full border-2 border-orange-300 hover:border-red-400">
+                        🗑️ 清除
+                    </button>
                 </div>
-                <div id="historyList" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar">
-                    <div class="text-gray-300 text-sm italic w-full text-center">尚無紀錄</div>
+                <div id="historyList" class="flex flex-wrap gap-3 max-h-40 overflow-y-auto custom-scrollbar p-2">
+                    <div class="text-gray-400 text-sm italic w-full text-center py-4">✨ 尚無紀錄 ✨</div>
                 </div>
             </div>
         </div>
@@ -327,14 +649,14 @@
         function renderHistory() {
             const list = document.getElementById('historyList');
             if (history.length === 0) {
-                list.innerHTML = '<div class="text-gray-300 text-sm italic w-full text-center">尚無紀錄</div>';
+                list.innerHTML = '<div class="text-gray-400 text-sm italic w-full text-center py-4">✨ 尚無紀錄 ✨</div>';
                 return;
             }
 
             list.innerHTML = history.map(h => `
-                <div class="bg-gray-50 border border-gray-100 px-3 py-1 rounded-lg text-xs flex flex-col items-center">
-                    <span class="font-bold text-gray-700 text-sm">${h.num}</span>
-                    <span class="${h.colorClass} font-medium">${h.action}</span>
+                <div class="history-card px-4 py-2 flex flex-col items-center shadow-sm hover:shadow-md">
+                    <span class="font-black text-gray-800 text-xl">${h.num}</span>
+                    <span class="${h.colorClass} font-bold text-xs">${h.action === "命中註定" ? "❤️" : "🔄"} ${h.action}</span>
                 </div>
             `).join('');
         }
