@@ -371,10 +371,67 @@
                 transform: translateY(-10px);
             }
         }
+
+        /* 煙火特效 */
+        .firework-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .firework {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: firework-explode 1.2s ease-out forwards;
+            box-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+        }
+
+        @keyframes firework-explode {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        .firework-spark {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 0 15px currentColor, 0 0 30px currentColor, 0 0 45px currentColor;
+            animation: spark-fade 1s ease-out forwards;
+        }
+
+        @keyframes spark-fade {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 
-<body class="p-4 md:p-8">
+<body class="p-2">
+    <!-- 煙火容器 -->
+    <div id="fireworkContainer" class="firework-container"></div>
+
     <!-- 聖誕裝飾元素 -->
     <!-- 聖誕樹 -->
     <div class="deco-tree" style="bottom: 20px; left: 20px;">🎄</div>
@@ -405,21 +462,21 @@
 
     <div class="max-w-xl mx-auto hand-drawn-container relative z-10">
         <!-- Header -->
-        <div class="hand-drawn-title p-8 text-white text-center">
-            <h1 class="text-3xl md:text-4xl font-black tracking-wide drop-shadow-lg"
+        <div class="hand-drawn-title p-4 text-white text-center">
+            <h1 class="text-2xl md:text-3xl font-black tracking-wide drop-shadow-lg"
                 style="text-shadow: 3px 3px 0 rgba(0,0,0,0.2);">
-                � 12月聖誕抽抽樂 🎁
+                🦌 12月聖誕抽抽樂 🎁
             </h1>
-            <p class="text-sm mt-2 opacity-90 font-medium">聖誕奇蹟！好運滿滿！</p>
+            <p class="text-xs mt-1 opacity-90 font-medium">聖誕奇蹟！好運滿滿！</p>
         </div>
 
-        <div class="p-6 md:p-8 space-y-6">
+        <div class="p-4 space-y-3">
             <!-- Settings Area -->
             <div
-                class="flex flex-col md:flex-row gap-4 items-end bg-gradient-to-br from-orange-50 to-yellow-50 p-5 rounded-3xl border-3 border-dashed border-orange-300">
+                class="flex flex-col md:flex-row gap-2 items-end bg-gradient-to-br from-orange-50 to-yellow-50 p-3 rounded-2xl border-3 border-dashed border-orange-300">
                 <div class="flex-1 space-y-2 w-full">
                     <label class="block text-sm font-bold text-orange-800 tracking-wide">🎯 設定總球數 (1 - N)</label>
-                    <input type="number" id="maxNumber" value="10" min="1" max="1000"
+                    <input type="number" id="maxNumber" value="19" min="1" max="1000"
                         class="hand-drawn-input w-full px-4 py-3 font-bold text-gray-700 text-lg">
                 </div>
                 <button onclick="resetPool()"
@@ -429,16 +486,16 @@
             </div>
 
             <!-- Drawing Interaction Area -->
-            <div class="relative py-8 flex flex-col items-center min-h-[350px] justify-center">
+            <div class="relative py-2 flex flex-col items-center min-h-[260px] justify-center">
                 <!-- Status Badge -->
                 <div class="hand-drawn-badge absolute top-2 right-2 px-4 py-2 text-sm font-bold text-red-600">
-                    🎪 箱內尚有：<span id="remainingCount" class="text-2xl">10</span> 顆球
+                    🎪 箱內尚有：<span id="remainingCount" class="text-2xl">19</span> 顆球
                 </div>
 
                 <!-- Box Icon / Animation Container -->
                 <div id="boxWrapper" class="relative gift-bounce">
                     <div id="drawBox" class="cursor-pointer transition-transform hover:scale-110 active:scale-95">
-                        <img src="logo.png" alt="抽籤箱Logo" class="w-56 h-56 object-contain drop-shadow-2xl"
+                        <img src="logo.png" alt="抽籤箱Logo" class="w-36 h-36 object-contain drop-shadow-2xl"
                             style="filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));">
                     </div>
 
@@ -475,7 +532,7 @@
 
                 <!-- Main Draw Button -->
                 <button id="drawBtn" onclick="startDraw()"
-                    class="hand-drawn-btn w-72 py-5 bg-gradient-to-br from-yellow-400 via-yellow-500 to-orange-500 hover:from-yellow-500 hover:via-yellow-600 hover:to-orange-600 text-white text-2xl font-black mt-6"
+                    class="hand-drawn-btn w-60 py-3 bg-gradient-to-br from-yellow-400 via-yellow-500 to-orange-500 hover:from-yellow-500 hover:via-yellow-600 hover:to-orange-600 text-white text-lg font-black -mt-4"
                     style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
                     🎁 抽出聖誕驚喜！
                 </button>
@@ -493,7 +550,7 @@
                         🗑️ 清除
                     </button>
                 </div>
-                <div id="historyList" class="flex flex-wrap gap-3 max-h-40 overflow-y-auto custom-scrollbar p-2">
+                <div id="historyList" class="flex flex-wrap gap-2 max-h-20 overflow-y-auto custom-scrollbar p-1">
                     <div class="text-gray-400 text-sm italic w-full text-center py-4">✨ 尚無紀錄 ✨</div>
                 </div>
             </div>
@@ -612,6 +669,9 @@
             // Stop shaking
             document.getElementById('drawBox').classList.remove('shaking');
 
+            // 🎆 觸發煙火特效！
+            launchFireworks();
+
             // Show decision panel
             const panel = document.getElementById('decisionPanel');
             panel.classList.remove('opacity-0', 'pointer-events-none');
@@ -682,6 +742,72 @@
                 startDraw();
             }
         });
+
+        // 🎆 煙火特效函數
+        function launchFireworks() {
+            const container = document.getElementById('fireworkContainer');
+            const colors = ['#ff6b6b', '#ffd93d', '#6bcf7f', '#4ecdc4', '#ff88dc', '#ffa94d'];
+
+            // 發射更多煙火（增加到5個）
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    createFirework(container, colors);
+                }, i * 180);
+            }
+        }
+
+        function createFirework(container, colors) {
+            // 隨機位置
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * (window.innerHeight * 0.6) + window.innerHeight * 0.1;
+
+            // 隨機顏色
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            // 創建粒子（增加數量）
+            const particleCount = 50;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'firework';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.background = color;
+                particle.style.boxShadow = `0 0 10px ${color}`;
+
+                // 隨機方向
+                const angle = (Math.PI * 2 * i) / particleCount;
+                const velocity = 50 + Math.random() * 120;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+
+                container.appendChild(particle);
+
+                // 移除粒子
+                setTimeout(() => {
+                    particle.remove();
+                }, 1200);
+            }
+
+            // 添加更多閃爍星星
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const spark = document.createElement('div');
+                    spark.className = 'firework-spark';
+                    spark.style.left = (x + (Math.random() - 0.5) * 100) + 'px';
+                    spark.style.top = (y + (Math.random() - 0.5) * 100) + 'px';
+                    spark.style.color = color;
+
+                    container.appendChild(spark);
+
+                    setTimeout(() => {
+                        spark.remove();
+                    }, 800);
+                }, i * 50);
+            }
+        }
     </script>
 </body>
 
